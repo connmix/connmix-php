@@ -62,7 +62,7 @@ class Client
         $node = $nodes[array_rand($nodes)];
         switch ($this->nodes->version()) {
             case 'v1':
-                $url = sprintf("ws://%s:%d/ws/v1", $node['ip'], $node['port']);
+                $url = sprintf("ws://%s/ws/v1", $node['host']);
                 return new NodeV1($url);
             default:
                 throw new \Exception('Invalid API version');
@@ -70,17 +70,16 @@ class Client
     }
 
     /**
-     * @param string $ip
-     * @param int $port
+     * @param string $host
      * @param string $version
      * @return SyncNodeInterface
      * @throws \Exception
      */
-    public function node(string $ip, int $port, string $version): SyncNodeInterface
+    public function node(string $host, string $version): SyncNodeInterface
     {
         switch ($version) {
             case 'v1':
-                $url = sprintf("ws://%s:%d/ws/v1", $ip, $port);
+                $url = sprintf("ws://%s/ws/v1", $host);
                 return new NodeV1($url);
             default:
                 throw new \Exception('Invalid API version');

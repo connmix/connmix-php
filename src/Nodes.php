@@ -91,7 +91,7 @@ class Nodes
         $url = sprintf("%s/version", $this->host);
         $response = $this->guzzle->request('GET', $url);
         $body = static::parseBody($response);
-        $api = $body['api'];
+        $api = $body['apis'];
         $this->version = array_shift($api);
     }
 

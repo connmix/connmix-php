@@ -71,8 +71,7 @@ class Consumer
         $this->onRejected = $onRejected;
 
         foreach ($this->nodes->items() as $node) {
-            $host = sprintf("%s:%d", $node['ip'], $node['port']);
-            $this->addEngine($host);
+            $this->addEngine($node['host']);
         }
     }
 
@@ -103,7 +102,7 @@ class Consumer
         return function () {
             // 增加
             foreach ($this->nodes->items() as $node) {
-                $host = sprintf("%s:%d", $node['ip'], $node['port']);
+                $host = $node['host'];
                 $find = false;
                 foreach ($this->engines as $engine) {
                     if ($engine->host == $host) {
@@ -120,8 +119,7 @@ class Consumer
             foreach ($this->engines as $key => $engine) {
                 $find = false;
                 foreach ($this->nodes->items() as $node) {
-                    $host = sprintf("%s:%d", $node['ip'], $node['port']);
-                    if ($engine->host == $host) {
+                    if ($engine->host == $node['host']) {
                         $find = true;
                         break;
                     }
