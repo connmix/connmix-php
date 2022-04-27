@@ -7,9 +7,7 @@ interface AsyncNodeInterface
 
     public function message(): MessageInterface;
 
-    public function queueConsume(string ...$names): int;
-
-    public function connCall(int $clientId, string $method, array $params): int;
+    public function consume(string ...$queues): int;
 
     public function setContextValue(int $clientId, string $key, $value): int;
 
