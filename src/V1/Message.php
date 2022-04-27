@@ -29,7 +29,7 @@ class Message implements MessageInterface
     /**
      * @return string
      */
-    public function rawMessage(): string
+    public function payload(): string
     {
         return $this->raw;
     }

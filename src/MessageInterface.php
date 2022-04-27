@@ -5,7 +5,7 @@ namespace Connmix;
 interface MessageInterface
 {
 
-    public function rawMessage(): string;
+    public function payload(): string;
 
     public function type(): string;
 

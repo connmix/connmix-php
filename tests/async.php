@@ -26,7 +26,7 @@ $onReceive = function (\Connmix\AsyncNodeInterface $node) {
             $error = $message->error();
             break;
         default:
-            $payload = $message->rawMessage();
+            $payload = $message->payload();
     }
 };
 $onError = function (\Throwable $e) {
