@@ -18,24 +18,25 @@ class Consumer
     protected $timeout = 0.0;
 
     /**
-     * @var array
-     */
-    protected $queues = [];
-
-    /**
      * @var EngineV1[]
      */
     public $engines = [];
 
-    /**
-     * @var callable
-     */
-    protected $onFulfilled;
 
     /**
      * @var callable
      */
-    protected $onRejected;
+    protected $onConnect;
+
+    /**
+     * @var callable
+     */
+    protected $onReceive;
+
+    /**
+     * @var callable
+     */
+    protected $onError;
 
     /**
      * @var int
@@ -45,30 +46,27 @@ class Consumer
     /**
      * @param Nodes $nodes
      * @param float $timeout
-     * @param array $queues
      * @throws \Exception
      */
-    public function __construct(Nodes $nodes, float $timeout, array $queues)
+    public function __construct(Nodes $nodes, float $timeout)
     {
-        if (empty($queues)) {
-            throw new \Exception('Consume queues cannot be empty');
-        }
         $this->nodes = $nodes;
         $this->timeout = $timeout;
-        $this->queues = $queues;
         \React\EventLoop\Loop::addTimer($this->syncInterval, $this->syncFunc());
     }
 
     /**
-     * @param callable $onFulfilled
-     * @param callable $onRejected
+     * @param callable $onConnect
+     * @param callable $onReceive
+     * @param callable $onError
      * @return void
      * @throws \Exception
      */
-    public function then(callable $onFulfilled, callable $onRejected): void
+    public function then(callable $onConnect, callable $onReceive, callable $onError): void
     {
-        $this->onFulfilled = $onFulfilled;
-        $this->onRejected = $onRejected;
+        $this->onConnect = $onConnect;
+        $this->onReceive = $onReceive;
+        $this->onError = $onError;
 
         foreach ($this->nodes->items() as $node) {
             $this->addEngine($node['host']);
@@ -84,7 +82,7 @@ class Consumer
     {
         switch ($this->nodes->version()) {
             case 'v1':
-                $engine = new EngineV1($this->onFulfilled, $this->onRejected, $this->queues, $host, $this->timeout);
+                $engine = new EngineV1($this->onConnect, $this->onReceive, $this->onError, $host, $this->timeout);
                 $engine->run();
                 $this->engines[] = $engine;
                 break;

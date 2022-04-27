@@ -14,25 +14,31 @@ composer require connmix/connmix
 
 该客户端消费消息为异步模式，主动发送为同步模式。
 
-- `consume('foo')` 消费内存队列，可以同时消费多个；队列中的数据是由 entry.lua 的 `mix.queue.push()` 方法推入。
-- `$onFulfilled` 闭包内处理业务逻辑。
-- `$onRejected` 闭包内处理网络异常。
+- `$onConnect` 闭包内处理初始化逻辑，`$onReceive` 闭包内处理业务逻辑，`$onError` 闭包内处理网络异常。
+- `$node->queueConsume('foo')` 消费内存队列，可以同时消费多个；队列中的数据是由 entry.lua 的 `mix.queue.push()` 方法推入。
 - 可以在 `Laravel`、`ThinkPHP` 等任意框架中使用。
 - 使用 `meshSend()`、`meshPublish()` 方法给客户端响应数据。
 - 无需处理重连，断线后客户端会自动重连。
 - connmix 集群增加节点后客户端无需重启，客户端会自动获取新增的节点，自动移除下线的节点。
 
 ```php
+<?php
+
+require __DIR__ . '/../vendor/autoload.php';
+
 $client = \Connmix\ClientBuilder::create()
     ->setHost('127.0.0.1:6787')
     ->build();
-$onFulfilled = function (\Connmix\AsyncNodeInterface $node) {
+$onConnect = function (\Connmix\AsyncNodeInterface $node) {
+    // 消费内存队列
+    $node->queueConsume('foo');
+};
+$onReceive = function (\Connmix\AsyncNodeInterface $node) {
     $message = $node->message();
     switch ($message->type()) {
         case "consume":
             $clientID = $message->clientID();
             $data = $message->data();
-            // do something
             $node->meshSend($clientID, sprintf("received: %s", $data['frame']['data'] ?? ''));
             break;
         case "result":
@@ -47,10 +53,10 @@ $onFulfilled = function (\Connmix\AsyncNodeInterface $node) {
             $payload = $message->rawMessage();
     }
 };
-$onRejected = function (\Throwable $e) {
+$onError = function (\Throwable $e) {
     // handle error
 };
-$client->consume('foo')->then($onFulfilled, $onRejected);
+$client->do($onConnect, $onReceive, $onError);
 ```
 
 ## 设置上下文

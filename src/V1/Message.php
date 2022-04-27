@@ -1,6 +1,6 @@
 <?php
 
-namespace Connmix\V1\Message;
+namespace Connmix\V1;
 
 use Connmix\MessageInterface;
 

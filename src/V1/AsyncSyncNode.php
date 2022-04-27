@@ -62,6 +62,15 @@ class AsyncSyncNode implements AsyncNodeInterface
     }
 
     /**
+     * @param string ...$names
+     * @return int
+     */
+    public function queueConsume(string ...$names): int
+    {
+        return $this->send('queue.consume', $names);
+    }
+
+    /**
      * @param int $clientId
      * @param string $method
      * @param array $params

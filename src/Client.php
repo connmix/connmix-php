@@ -39,17 +39,19 @@ class Client
         $this->nodes = new Nodes($this->host, $this->timeout);
     }
 
-
     /**
-     * @param string ...$queues
-     * @return Consumer
+     * @param callable $onConnect
+     * @param callable $onReceive
+     * @param callable $onError
+     * @return void
+     * @throws \Exception
      */
-    public function consume(string ...$queues): Consumer
+    public function do(callable $onConnect, callable $onReceive, callable $onError): void
     {
         $this->nodes->startSync();
-        $consumer = new Consumer($this->nodes, $this->timeout, $queues);
+        $consumer = new Consumer($this->nodes, $this->timeout);
         $this->consumers[] = $consumer;
-        return $consumer;
+        $consumer->then($onConnect, $onReceive, $onError);
     }
 
     /**

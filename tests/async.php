@@ -5,7 +5,11 @@ require __DIR__ . '/../vendor/autoload.php';
 $client = \Connmix\ClientBuilder::create()
     ->setHost('127.0.0.1:6787')
     ->build();
-$onFulfilled = function (\Connmix\AsyncNodeInterface $node) {
+$onConnect = function (\Connmix\AsyncNodeInterface $node) {
+    // 消费内存队列
+    $node->queueConsume('foo');
+};
+$onReceive = function (\Connmix\AsyncNodeInterface $node) {
     $message = $node->message();
     switch ($message->type()) {
         case "consume":
@@ -25,8 +29,7 @@ $onFulfilled = function (\Connmix\AsyncNodeInterface $node) {
             $payload = $message->rawMessage();
     }
 };
-$onRejected = function (\Throwable $e) {
+$onError = function (\Throwable $e) {
     // handle error
-    var_dump($e->getMessage());
 };
-$client->consume('foo')->then($onFulfilled, $onRejected);
+$client->do($onConnect, $onReceive, $onError);

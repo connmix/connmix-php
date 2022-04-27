@@ -2,21 +2,23 @@
 
 namespace Connmix\V1;
 
-use Connmix\V1\Message\ConsumeMessage;
-use Connmix\V1\Message\Message;
-
 class Engine
 {
 
     /**
      * @var \Closure
      */
-    protected $onFulfilled;
+    protected $onConnect;
 
     /**
      * @var \Closure
      */
-    protected $onRejected;
+    protected $onReceive;
+
+    /**
+     * @var \Closure
+     */
+    protected $onError;
 
     /**
      * @var string
@@ -29,29 +31,24 @@ class Engine
     protected $timeout = 0.0;
 
     /**
-     * @var ConsumeMessage
-     */
-    protected $message;
-
-    /**
      * @var \Ratchet\Client\WebSocket
      */
     public $conn;
 
     /**
-     * @param callable $onFulfilled
-     * @param callable $onRejected
-     * @param array $queues
+     * @param callable $onConnect
+     * @param callable $onReceive
+     * @param callable $onError
      * @param string $host
      * @param float $timeout
      */
-    public function __construct(callable $onFulfilled, callable $onRejected, array $queues, string $host, float $timeout)
+    public function __construct(callable $onConnect, callable $onReceive, callable $onError, string $host, float $timeout)
     {
-        $this->onFulfilled = $onFulfilled;
-        $this->onRejected = $onRejected;
+        $this->onConnect = $onConnect;
+        $this->onReceive = $onReceive;
+        $this->onError = $onError;
         $this->host = $host;
         $this->timeout = $timeout;
-        $this->message = new ConsumeMessage($queues);
     }
 
     /**
@@ -68,30 +65,32 @@ class Engine
         $connector($url, [], [])
             ->then(function (\Ratchet\Client\WebSocket $conn) use ($url) {
                 $this->conn = $conn;
-                $onFulfilled = $this->onFulfilled;
-                $onRejected = $this->onRejected;
 
-                $conn->on('message', function (\Ratchet\RFC6455\Messaging\MessageInterface $msg) use ($conn, $onFulfilled, $onRejected) {
+                $onConnect = $this->onConnect;
+                $onReceive = $this->onReceive;
+                $onError = $this->onError;
+
+                $conn->on('message', function (\Ratchet\RFC6455\Messaging\MessageInterface $msg) use ($conn, $onReceive, $onError) {
                     try {
                         $receiveMessage = new Message($msg->getPayload());
-                        $onFulfilled(new AsyncSyncNode($conn, $receiveMessage, new Encoder()));
+                        $onReceive(new AsyncSyncNode($conn, $receiveMessage, new Encoder()));
                     } catch (\Throwable $e) {
-                        $onRejected($e);
+                        $onError($e);
                     }
                 });
 
-                $conn->on('close', function ($code = null, $reason = null) use ($onRejected, $url) {
-                    $onRejected(new \Exception(sprintf('Client connection closed (code=%d, reason=%s, url=%s)', $code, $reason, $url)));
+                $conn->on('close', function ($code = null, $reason = null) use ($onError, $url) {
+                    $onError(new \Exception(sprintf('Client connection closed (code=%d, reason=%s, url=%s)', $code, $reason, $url)));
                     \React\EventLoop\Loop::addTimer(1, [$this, 'run']);
                 });
 
                 try {
-                    $conn->send($this->message->getContents());
+                    $onConnect(new AsyncSyncNode($conn, new Message('{}'), new Encoder()));
                 } catch (\Throwable $e) {
-                    $onRejected($e);
+                    $onError($e);
                 }
             }, function (\Throwable $e) use ($loop) {
-                $onRejected = $this->onRejected;
+                $onRejected = $this->onError;
                 $onRejected($e);
                 \React\EventLoop\Loop::addTimer(1, [$this, 'run']);
             });
