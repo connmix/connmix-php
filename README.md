@@ -15,7 +15,7 @@ composer require connmix/connmix
 该客户端消费消息为异步模式，主动发送为同步模式。
 
 - `$onConnect` 闭包内处理初始化逻辑，`$onReceive` 闭包内处理业务逻辑，`$onError` 闭包内处理网络异常。
-- `$node->queueConsume('foo')` 消费内存队列，可以同时消费多个；队列中的数据是由 entry.lua 的 `mix.queue.push()` 方法推入。
+- `$node->consume('foo')` 消费内存队列，可以同时消费多个；队列中的数据是由 entry.lua 的 `mix.queue.push()` 方法推入。
 - 可以在 `Laravel`、`ThinkPHP` 等任意框架中使用。
 - 使用 `meshSend()`、`meshPublish()` 方法给客户端响应数据。
 - 无需处理重连，断线后客户端会自动重连。
