@@ -74,7 +74,7 @@ end
 - 通过客户端执行 `set_context_value` 来完成鉴权。
 
 ```php
-$onFulfilled = function (\Connmix\AsyncNodeInterface $node) {
+$onReceive = function (\Connmix\AsyncNodeInterface $node) {
     $message = $node->message();
     switch ($message->type()) {
         case "consume":
@@ -98,7 +98,7 @@ $onFulfilled = function (\Connmix\AsyncNodeInterface $node) {
 通过给某个连接订阅频道，我们可以给这些连接分组，比如：我有手机、电脑的2个连接，在通过授权验证后，我们可以都订阅 `user_10001` 频道，这样我们给该频道发送消息时就可以达到多个设备都可以收到消息的效果。
 
 ```php
-$onFulfilled = function (\Connmix\AsyncNodeInterface $node) {
+$onReceive = function (\Connmix\AsyncNodeInterface $node) {
     $message = $node->message();
     switch ($message->type()) {
         case "consume":
@@ -116,7 +116,7 @@ $onFulfilled = function (\Connmix\AsyncNodeInterface $node) {
 - 接收消息时被动推送
 
 ```php
-$onFulfilled = function (\Connmix\AsyncNodeInterface $node) {
+$onReceive = function (\Connmix\AsyncNodeInterface $node) {
     $message = $node->message();
     switch ($message->type()) {
         case "consume":
@@ -140,7 +140,7 @@ $message = $node->meshPublish("user_10001", '{"broadcast":"ok"}');
 - 接收消息时被动发送
 
 ```php
-$onFulfilled = function (\Connmix\AsyncNodeInterface $node) {
+$onReceive = function (\Connmix\AsyncNodeInterface $node) {
     $message = $node->message();
     switch ($message->type()) {
         case "consume":
