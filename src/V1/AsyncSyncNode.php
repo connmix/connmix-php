@@ -72,16 +72,16 @@ class AsyncSyncNode implements AsyncNodeInterface
 
     /**
      * @param int $clientId
-     * @param string $method
-     * @param array $params
+     * @param string $func
+     * @param array $args
      * @return int
      */
-    public function connCall(int $clientId, string $method, array $params): int
+    public function connCall(int $clientId, string $func, array $args): int
     {
         return $this->send('conn.call', [
             'client_id' => $clientId,
-            'method' => $method,
-            'params' => $params,
+            'func' => $func,
+            'args' => $args,
         ]);
     }
 
@@ -146,7 +146,7 @@ class AsyncSyncNode implements AsyncNodeInterface
      */
     public function meshPublish(string $channel, string $data): int
     {
-        return $this->send('mesh.send', [
+        return $this->send('mesh.publish', [
             'channel' => $channel,
             'data' => $data,
         ]);

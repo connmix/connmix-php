@@ -18,7 +18,7 @@ class AutoIncrement
         if (static::$id == PHP_INT_MAX) {
             static::$id = 0;
         }
-        return static::$id;
+        return static::$id++;
     }
 
 }
