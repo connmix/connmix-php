@@ -93,9 +93,17 @@ class AsyncSyncNode implements AsyncNodeInterface
      */
     public function setContextValue(int $clientId, string $key, $value): int
     {
-        return $this->connCall($clientId, 'set_context_value', [
-            $key => $value,
-        ]);
+        return $this->connCall($clientId, 'set_context_value', [$key, $value]);
+    }
+
+    /**
+     * @param int $clientId
+     * @param array $data
+     * @return int
+     */
+    public function setContext(int $clientId, array $data): int
+    {
+        return $this->connCall($clientId, 'set_context', [$data]);
     }
 
     /**
@@ -106,6 +114,16 @@ class AsyncSyncNode implements AsyncNodeInterface
     public function subscribe(int $clientId, string ...$channels): int
     {
         return $this->connCall($clientId, 'subscribe', $channels);
+    }
+
+    /**
+     * @param int $clientId
+     * @param string ...$channels
+     * @return int
+     */
+    public function unsubscribe(int $clientId, string ...$channels): int
+    {
+        return $this->connCall($clientId, 'unsubscribe', $channels);
     }
 
     /**

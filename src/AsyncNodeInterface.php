@@ -11,7 +11,11 @@ interface AsyncNodeInterface
 
     public function setContextValue(int $clientId, string $key, $value): int;
 
+    public function setContext(int $clientId, array $data): int;
+
     public function subscribe(int $clientId, string ...$channels): int;
+
+    public function unsubscribe(int $clientId, string ...$channels): int;
 
     public function send(string $method, array $params = []): int;
 

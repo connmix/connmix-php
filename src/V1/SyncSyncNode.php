@@ -5,7 +5,6 @@ namespace Connmix\V1;
 use Connmix\AutoIncrement;
 use Connmix\MessageInterface;
 use Connmix\SyncNodeInterface;
-use Connmix\V1\Message\Message;
 
 class SyncSyncNode implements SyncNodeInterface
 {
