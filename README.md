@@ -39,6 +39,7 @@ $onReceive = function (\Connmix\AsyncNodeInterface $node) {
         case "consume":
             $clientID = $message->clientID();
             $data = $message->data();
+            // 回复消息
             $node->meshSend($clientID, sprintf("received: %s", $data['frame']['data'] ?? ''));
             break;
         case "result":
