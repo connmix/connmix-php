@@ -4,7 +4,7 @@ namespace Connmix;
 
 use Connmix\V1\Engine as EngineV1;
 
-class Consumer
+class Connector
 {
 
     /**
@@ -31,7 +31,7 @@ class Consumer
     /**
      * @var callable
      */
-    protected $onReceive;
+    protected $onMessage;
 
     /**
      * @var callable
@@ -57,15 +57,15 @@ class Consumer
 
     /**
      * @param callable $onConnect
-     * @param callable $onReceive
+     * @param callable $onMessage
      * @param callable $onError
      * @return void
      * @throws \Exception
      */
-    public function then(callable $onConnect, callable $onReceive, callable $onError): void
+    public function then(callable $onConnect, callable $onMessage, callable $onError): void
     {
         $this->onConnect = $onConnect;
-        $this->onReceive = $onReceive;
+        $this->onMessage = $onMessage;
         $this->onError = $onError;
 
         foreach ($this->nodes->items() as $node) {
@@ -82,7 +82,7 @@ class Consumer
     {
         switch ($this->nodes->version()) {
             case 'v1':
-                $engine = new EngineV1($this->onConnect, $this->onReceive, $this->onError, $host, $this->timeout);
+                $engine = new EngineV1($this->onConnect, $this->onMessage, $this->onError, $host, $this->timeout);
                 $engine->run();
                 $this->engines[] = $engine;
                 break;

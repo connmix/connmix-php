@@ -18,14 +18,29 @@ class Client
     protected $timeout = 10.0;
 
     /**
+     * @var callable
+     */
+    protected $onConnect;
+
+    /**
+     * @var callable
+     */
+    protected $onMessage;
+
+    /**
+     * @var callable
+     */
+    protected $onError;
+
+    /**
      * @var Nodes
      */
     protected $nodes;
 
     /**
-     * @var Consumer[]
+     * @var Connector
      */
-    protected $consumers = [];
+    protected $connector;
 
     /**
      * @param array $config
@@ -35,8 +50,6 @@ class Client
         foreach ($config as $key => $value) {
             $this->$key = $value;
         }
-
-        $this->nodes = new Nodes($this->host, $this->timeout);
     }
 
     /**
@@ -44,14 +57,40 @@ class Client
      * @param callable $onReceive
      * @param callable $onError
      * @return void
-     * @throws \Exception
+     * @throws \Exception|\GuzzleHttp\Exception\GuzzleException
+     * @deprecated 废弃
      */
     public function do(callable $onConnect, callable $onReceive, callable $onError): void
     {
+        $this->nodes = new Nodes($this->host, $this->timeout);
         $this->nodes->startSync();
-        $consumer = new Consumer($this->nodes, $this->timeout);
-        $this->consumers[] = $consumer;
-        $consumer->then($onConnect, $onReceive, $onError);
+        $this->connector = new Connector($this->nodes, $this->timeout);
+        $this->connector->then($onConnect, $onReceive, $onError);
+    }
+
+    /**
+     * @param callable $connect
+     * @param callable $message
+     * @param callable $error
+     * @return void
+     */
+    public function on(callable $connect, callable $message, callable $error): void
+    {
+        $this->onConnect = $connect;
+        $this->onMessage = $message;
+        $this->onError = $error;
+    }
+
+    /**
+     * @return void
+     * @throws \Exception|\GuzzleHttp\Exception\GuzzleException
+     */
+    public function run(): void
+    {
+        $this->nodes = new Nodes($this->host, $this->timeout);
+        $this->nodes->startSync();
+        $this->connector = new Connector($this->nodes, $this->timeout);
+        $this->connector->then($this->onConnect, $this->onMessage, $this->onError);
     }
 
     /**
@@ -93,11 +132,9 @@ class Client
      */
     public function close(): void
     {
-        foreach ($this->consumers as $consumer) {
-            $consumer->close();
-        }
+        $this->connector and $this->connector->close();
 
-        $this->nodes->close();
+        $this->nodes and $this->nodes->close();
 
         $loop = \React\EventLoop\Loop::get();
         $loop->stop();

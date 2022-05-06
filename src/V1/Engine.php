@@ -13,7 +13,7 @@ class Engine
     /**
      * @var \Closure
      */
-    protected $onReceive;
+    protected $onMessage;
 
     /**
      * @var \Closure
@@ -37,15 +37,15 @@ class Engine
 
     /**
      * @param callable $onConnect
-     * @param callable $onReceive
+     * @param callable $onMessage
      * @param callable $onError
      * @param string $host
      * @param float $timeout
      */
-    public function __construct(callable $onConnect, callable $onReceive, callable $onError, string $host, float $timeout)
+    public function __construct(callable $onConnect, callable $onMessage, callable $onError, string $host, float $timeout)
     {
         $this->onConnect = $onConnect;
-        $this->onReceive = $onReceive;
+        $this->onMessage = $onMessage;
         $this->onError = $onError;
         $this->host = $host;
         $this->timeout = $timeout;
@@ -67,13 +67,13 @@ class Engine
                 $this->conn = $conn;
 
                 $onConnect = $this->onConnect;
-                $onReceive = $this->onReceive;
+                $onMessage = $this->onMessage;
                 $onError = $this->onError;
 
-                $conn->on('message', function (\Ratchet\RFC6455\Messaging\MessageInterface $msg) use ($conn, $onReceive, $onError) {
+                $conn->on('message', function (\Ratchet\RFC6455\Messaging\MessageInterface $msg) use ($conn, $onMessage, $onError) {
                     try {
-                        $receiveMessage = new Message($msg->getPayload());
-                        $onReceive(new AsyncSyncNode($conn, $receiveMessage, new Encoder()));
+                        $message = new Message($msg->getPayload());
+                        $onMessage(new AsyncSyncNode($conn, $message, new Encoder()));
                     } catch (\Throwable $e) {
                         $onError($e);
                     }
@@ -90,13 +90,16 @@ class Engine
                     $onError($e);
                 }
             }, function (\Throwable $e) use ($loop) {
-                $onRejected = $this->onError;
-                $onRejected($e);
+                $onError = $this->onError;
+                $onError($e);
                 \React\EventLoop\Loop::addTimer(1, [$this, 'run']);
             });
     }
 
-    public function close()
+    /**
+     * @return void
+     */
+    public function close(): void
     {
         $this->conn and $this->conn->close();
     }

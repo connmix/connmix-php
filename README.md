@@ -14,7 +14,7 @@ composer require connmix/connmix
 
 该客户端消费消息为异步模式，主动发送为同步模式。
 
-- `$onConnect` 闭包内处理初始化逻辑，`$onReceive` 闭包内处理业务逻辑，`$onError` 闭包内处理网络异常。
+- `$onConnect` 闭包内处理初始化逻辑，`$onMessage` 闭包内处理业务逻辑，`$onError` 闭包内处理网络异常。
 - `$node->consume('foo')` 消费内存队列，可以同时消费多个；队列中的数据是由 entry.lua 的 `mix.queue.push()` 方法推入。
 - 可以在 `Laravel`、`ThinkPHP` 等任意框架中使用。
 - 使用 `meshSend()`、`meshPublish()` 方法给客户端响应数据。
@@ -33,7 +33,7 @@ $onConnect = function (\Connmix\AsyncNodeInterface $node) {
     // 消费内存队列
     $node->consume('foo');
 };
-$onReceive = function (\Connmix\AsyncNodeInterface $node) {
+$onMessage = function (\Connmix\AsyncNodeInterface $node) {
     $message = $node->message();
     switch ($message->type()) {
         case "consume":
@@ -57,7 +57,8 @@ $onReceive = function (\Connmix\AsyncNodeInterface $node) {
 $onError = function (\Throwable $e) {
     // handle error
 };
-$client->do($onConnect, $onReceive, $onError);
+$client->on($onConnect, $onMessage, $onError);
+$client->run();
 ```
 
 ## 设置上下文
@@ -75,7 +76,7 @@ end
 - 通过客户端执行 `set_context_value` 来完成鉴权。
 
 ```php
-$onReceive = function (\Connmix\AsyncNodeInterface $node) {
+$onMessage = function (\Connmix\AsyncNodeInterface $node) {
     $message = $node->message();
     switch ($message->type()) {
         case "consume":
@@ -99,7 +100,7 @@ $onReceive = function (\Connmix\AsyncNodeInterface $node) {
 通过给某个连接订阅频道，我们可以给这些连接分组，比如：我有手机、电脑的2个连接，在通过授权验证后，我们可以都订阅 `user_10001` 频道，这样我们给该频道发送消息时就可以达到多个设备都可以收到消息的效果。
 
 ```php
-$onReceive = function (\Connmix\AsyncNodeInterface $node) {
+$onMessage = function (\Connmix\AsyncNodeInterface $node) {
     $message = $node->message();
     switch ($message->type()) {
         case "consume":
@@ -117,7 +118,7 @@ $onReceive = function (\Connmix\AsyncNodeInterface $node) {
 - 接收消息时被动推送
 
 ```php
-$onReceive = function (\Connmix\AsyncNodeInterface $node) {
+$onMessage = function (\Connmix\AsyncNodeInterface $node) {
     $message = $node->message();
     switch ($message->type()) {
         case "consume":
@@ -141,7 +142,7 @@ $message = $node->meshPublish("user_10001", '{"broadcast":"ok"}');
 - 接收消息时被动发送
 
 ```php
-$onReceive = function (\Connmix\AsyncNodeInterface $node) {
+$onMessage = function (\Connmix\AsyncNodeInterface $node) {
     $message = $node->message();
     switch ($message->type()) {
         case "consume":
