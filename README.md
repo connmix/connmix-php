@@ -2,8 +2,6 @@
 
 通过该客户端可以使用 PHP 来开发分布式长连接服务，客户端可以消费 connmix 指定内存队列的用户消息，执行业务逻辑后响应到对应的用户端。
 
-> 本客户端只支持在 PHP CLI 模式下运行
-
 ## 快速上手
 
 ### 安装
@@ -22,6 +20,8 @@ composer require connmix/connmix
 - 使用 `meshSend()`、`meshPublish()` 方法给客户端响应数据。
 - 无需处理重连，断线后客户端会自动重连。
 - connmix 集群增加节点后客户端无需重启，客户端会自动获取新增的节点，自动移除下线的节点。
+
+> 异步模式只支持在 PHP CLI 模式下运行
 
 ```php
 <?php
@@ -130,7 +130,7 @@ $onMessage = function (\Connmix\AsyncNodeInterface $node) {
 };
 ```
 
-- 主动推送
+- 同步主动推送
 
 ```php
 $node = $client->random();
@@ -155,7 +155,7 @@ $onMessage = function (\Connmix\AsyncNodeInterface $node) {
 };
 ```
 
-- 主动发送
+- 同步主动发送
 
 ```php
 $node = $client->random();
