@@ -130,7 +130,7 @@ $onMessage = function (\Connmix\AsyncNodeInterface $node) {
 };
 ```
 
-- 同步主动推送
+- 主动推送 (同步模式)
 
 ```php
 $node = $client->random();
@@ -155,7 +155,7 @@ $onMessage = function (\Connmix\AsyncNodeInterface $node) {
 };
 ```
 
-- 同步主动发送
+- 主动发送 (同步模式)
 
 ```php
 $node = $client->random();
