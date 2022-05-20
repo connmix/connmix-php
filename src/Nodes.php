@@ -75,7 +75,7 @@ class Nodes
             try {
                 $this->loadNodes();
             } catch (\Throwable $ex) {
-                echo sprintf("ERROR: load nodes fail: %s\n", $ex->getMessage());
+                echo sprintf("ERROR: Failed to load nodes: %s\n", $ex->getMessage());
             }
             $this->timer = \React\EventLoop\Loop::addTimer($this->loadInterval + mt_rand(1, 10), $func);
         };
