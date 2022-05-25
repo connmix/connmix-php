@@ -12,7 +12,7 @@ $onConnect = function (\Connmix\AsyncNodeInterface $node) {
 $onMessage = function (\Connmix\AsyncNodeInterface $node) {
     $message = $node->message();
     switch ($message->type()) {
-        case "consume":
+        case "event":
             $clientID = $message->clientID();
             $data = $message->data();
             // 回复消息
