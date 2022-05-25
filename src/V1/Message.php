@@ -103,27 +103,27 @@ class Message implements MessageInterface
     }
 
     /**
-     * @return int
+     * @return string
      */
-    public function nodeID(): int
+    public function nodeID(): string
     {
-        $result = $this->params();
-        if (!$result) {
+        $params = $this->params();
+        if (!$params) {
             return 0;
         }
-        return $result['n'] ?? 0;
+        return $params['n'] ?? 0;
     }
 
     /**
-     * @return int
+     * @return string
      */
-    public function clientID(): int
+    public function clientID(): string
     {
-        $result = $this->params();
-        if (!$result) {
+        $params = $this->params();
+        if (!$params) {
             return 0;
         }
-        return $result['c'] ?? 0;
+        return $params['c'] ?? 0;
     }
 
     /**
@@ -131,11 +131,11 @@ class Message implements MessageInterface
      */
     public function topic(): string
     {
-        $result = $this->params();
-        if (!$result) {
+        $params = $this->params();
+        if (!$params) {
             return '';
         }
-        return $result['t'] ?? '';
+        return $params['t'] ?? '';
     }
 
     /**
@@ -143,11 +143,11 @@ class Message implements MessageInterface
      */
     public function data(): ?array
     {
-        $result = $this->params();
-        if (!$result) {
+        $params = $this->params();
+        if (!$params) {
             return [];
         }
-        return $result['d'] ?? [];
+        return $params['d'] ?? [];
     }
 
     /**

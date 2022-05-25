@@ -19,9 +19,9 @@ interface MessageInterface
 
     public function params(): ?array;
 
-    public function nodeID(): int;
+    public function nodeID(): string;
 
-    public function clientID(): int;
+    public function clientID(): string;
 
     public function topic(): string;
 

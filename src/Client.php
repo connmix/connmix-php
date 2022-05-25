@@ -99,6 +99,11 @@ class Client
      */
     public function node(?string $id): SyncNodeInterface
     {
+        if (!isset($this->nodes)) {
+            $this->nodes = new Nodes($this->host, $this->timeout);
+            $this->nodes->startSync();
+        }
+
         $cache = &$this->cache;
         if (isset($cache[$id])) {
             return $cache[$id];
