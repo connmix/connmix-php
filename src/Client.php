@@ -2,7 +2,9 @@
 
 namespace Connmix;
 
-use Connmix\V1\SyncSyncNode as NodeV1;
+use Connmix\V1\Message;
+use Connmix\V1\SyncNode;
+use Connmix\V1\SyncNode as NodeV1;
 
 class Client
 {
@@ -38,6 +40,11 @@ class Client
     protected $nodes;
 
     /**
+     * @var SyncNode[]
+     */
+    protected $cache;
+
+    /**
      * @var Connector
      */
     protected $connector;
@@ -50,22 +57,6 @@ class Client
         foreach ($config as $key => $value) {
             $this->$key = $value;
         }
-    }
-
-    /**
-     * @param callable $onConnect
-     * @param callable $onReceive
-     * @param callable $onError
-     * @return void
-     * @throws \Exception|\GuzzleHttp\Exception\GuzzleException
-     * @deprecated 废弃
-     */
-    public function do(callable $onConnect, callable $onReceive, callable $onError): void
-    {
-        $this->nodes = new Nodes($this->host, $this->timeout);
-        $this->nodes->startSync();
-        $this->connector = new Connector($this->nodes, $this->timeout);
-        $this->connector->then($onConnect, $onReceive, $onError);
     }
 
     /**
@@ -94,20 +85,44 @@ class Client
     }
 
     /**
-     * @return SyncNodeInterface
-     * @throws \Exception
+     * @param string $message
+     * @return MessageInterface
      */
-    public function random(): SyncNodeInterface
+    public function parse(string $params): MessageInterface
     {
-        $nodes = $this->nodes->items();
-        $node = $nodes[array_rand($nodes)];
-        switch ($this->nodes->version()) {
-            case 'v1':
-                $url = sprintf("ws://%s/ws/v1", $node['host']);
-                return new NodeV1($url);
-            default:
-                throw new \Exception('Invalid API version');
+        return new Message(sprintf('{"p":%s}', $params));
+    }
+
+    /**
+     * @param string|null $id
+     * @return SyncNodeInterface
+     */
+    public function node(?string $id): SyncNodeInterface
+    {
+        $cache = &$this->cache;
+        if (isset($cache[$id])) {
+            return $cache[$id];
         }
+
+        $nodes = $this->nodes->items();
+        $version = $this->nodes->version();
+        if (is_null($id)) {
+            $node = $nodes[array_rand($nodes)];
+            $newNode = $this->newNode($node['api_server'], $version);
+            $cache[$node['id']] = $newNode;
+            return $newNode;
+        }
+
+        foreach ($nodes as $node) {
+            if ($node['id'] == $id) {
+                $newNode = $this->newNode($node['api_server'], $version);
+                $cache[$id] = $newNode;
+                return $newNode;
+            }
+        }
+
+        // 找不到就返回一个随机节点
+        return $this->node(null);
     }
 
     /**
@@ -116,7 +131,7 @@ class Client
      * @return SyncNodeInterface
      * @throws \Exception
      */
-    public function node(string $host, string $version): SyncNodeInterface
+    protected function newNode(string $host, string $version): SyncNodeInterface
     {
         switch ($version) {
             case 'v1':

@@ -73,7 +73,7 @@ class Engine
                 $conn->on('message', function (\Ratchet\RFC6455\Messaging\MessageInterface $msg) use ($conn, $onMessage, $onError) {
                     try {
                         $message = new Message($msg->getPayload());
-                        $onMessage(new AsyncSyncNode($conn, $message, new Encoder()));
+                        $onMessage(new AsyncNode($conn, $message, new Encoder()));
                     } catch (\Throwable $e) {
                         $onError($e);
                     }
@@ -85,7 +85,7 @@ class Engine
                 });
 
                 try {
-                    $onConnect(new AsyncSyncNode($conn, new Message('{}'), new Encoder()));
+                    $onConnect(new AsyncNode($conn, new Message('{}'), new Encoder()));
                 } catch (\Throwable $e) {
                     $onError($e);
                 }

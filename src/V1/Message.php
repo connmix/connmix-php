@@ -40,7 +40,7 @@ class Message implements MessageInterface
     public function type(): string
     {
         if ($this->event() !== '') {
-            return 'consume';
+            return 'event';
         }
 
         if (!is_null($this->error())) {
@@ -59,7 +59,7 @@ class Message implements MessageInterface
      */
     public function method(): string
     {
-        return $this->storage['method'] ?? '';
+        return $this->storage['m'] ?? '';
     }
 
     /**
@@ -67,7 +67,7 @@ class Message implements MessageInterface
      */
     public function event(): string
     {
-        return $this->storage['event'] ?? '';
+        return $this->storage['e'] ?? '';
     }
 
     /**
@@ -75,7 +75,7 @@ class Message implements MessageInterface
      */
     public function error(): ?array
     {
-        return $this->storage['error'] ?? null;
+        return $this->storage['E'] ?? null;
     }
 
     /**
@@ -83,7 +83,7 @@ class Message implements MessageInterface
      */
     public function params(): ?array
     {
-        return $this->storage['params'] ?? null;
+        return $this->storage['p'] ?? null;
     }
 
     /**
@@ -91,7 +91,7 @@ class Message implements MessageInterface
      */
     public function result(): ?array
     {
-        return $this->storage['result'] ?? null;
+        return $this->storage['r'] ?? null;
     }
 
     /**
@@ -99,7 +99,19 @@ class Message implements MessageInterface
      */
     public function id(): ?int
     {
-        return $this->storage['id'] ?? null;
+        return $this->storage['i'] ?? null;
+    }
+
+    /**
+     * @return int
+     */
+    public function nodeID(): int
+    {
+        $result = $this->params();
+        if (!$result) {
+            return 0;
+        }
+        return $result['n'] ?? 0;
     }
 
     /**
@@ -107,23 +119,23 @@ class Message implements MessageInterface
      */
     public function clientID(): int
     {
-        $result = $this->result();
+        $result = $this->params();
         if (!$result) {
             return 0;
         }
-        return $result['client_id'] ?? 0;
+        return $result['c'] ?? 0;
     }
 
     /**
      * @return string
      */
-    public function queue(): string
+    public function topic(): string
     {
-        $result = $this->result();
+        $result = $this->params();
         if (!$result) {
             return '';
         }
-        return $result['queue'] ?? '';
+        return $result['t'] ?? '';
     }
 
     /**
@@ -131,11 +143,11 @@ class Message implements MessageInterface
      */
     public function data(): ?array
     {
-        $result = $this->result();
+        $result = $this->params();
         if (!$result) {
             return [];
         }
-        return $result['data'] ?? [];
+        return $result['d'] ?? [];
     }
 
     /**
@@ -147,7 +159,7 @@ class Message implements MessageInterface
         if (!$result) {
             return false;
         }
-        return $result['success'] ?? false;
+        return $result['s'] ?? false;
     }
 
     /**
@@ -159,7 +171,7 @@ class Message implements MessageInterface
         if (!$result) {
             return false;
         }
-        return $result['fail'] ?? 0;
+        return $result['f'] ?? 0;
     }
 
     /**
@@ -171,7 +183,7 @@ class Message implements MessageInterface
         if (!$result) {
             return false;
         }
-        return $result['total'] ?? 0;
+        return $result['t'] ?? 0;
     }
 
 }

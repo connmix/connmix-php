@@ -7,7 +7,7 @@ use Connmix\MessageInterface;
 use Connmix\AsyncNodeInterface;
 use Ratchet\Client\WebSocket;
 
-class AsyncSyncNode implements AsyncNodeInterface
+class AsyncNode implements AsyncNodeInterface
 {
 
     /**
@@ -53,21 +53,21 @@ class AsyncSyncNode implements AsyncNodeInterface
     {
         $id = AutoIncrement::id();
         $message = $this->encoder->encode([
-            'method' => $method,
-            'params' => $params,
-            'id' => $id,
+            'm' => $method,
+            'p' => $params,
+            'i' => $id,
         ]);
         $this->conn->send($message);
         return $id;
     }
 
     /**
-     * @param string ...$queues
+     * @param string ...$topics
      * @return int
      */
-    public function consume(string ...$queues): int
+    public function consume(string ...$topics): int
     {
-        return $this->send('queue.consume', $queues);
+        return $this->send('queue.consume', $topics);
     }
 
     /**
@@ -79,9 +79,9 @@ class AsyncSyncNode implements AsyncNodeInterface
     public function connCall(int $clientId, string $func, array $args): int
     {
         return $this->send('conn.call', [
-            'client_id' => $clientId,
-            'func' => $func,
-            'args' => $args,
+            'c' => $clientId,
+            'f' => $func,
+            'a' => $args,
         ]);
     }
 
@@ -134,8 +134,8 @@ class AsyncSyncNode implements AsyncNodeInterface
     public function meshSend(int $clientId, string $data): int
     {
         return $this->send('mesh.send', [
-            'client_id' => $clientId,
-            'data' => $data,
+            'c' => $clientId,
+            'd' => $data,
         ]);
     }
 
@@ -147,8 +147,8 @@ class AsyncSyncNode implements AsyncNodeInterface
     public function meshPublish(string $channel, string $data): int
     {
         return $this->send('mesh.publish', [
-            'channel' => $channel,
-            'data' => $data,
+            'c' => $channel,
+            'd' => $data,
         ]);
     }
 

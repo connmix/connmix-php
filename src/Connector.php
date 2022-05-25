@@ -69,7 +69,7 @@ class Connector
         $this->onError = $onError;
 
         foreach ($this->nodes->items() as $node) {
-            $this->addEngine($node['host']);
+            $this->addEngine($node['api_server']);
         }
     }
 
@@ -100,7 +100,7 @@ class Connector
         return function () {
             // 增加
             foreach ($this->nodes->items() as $node) {
-                $host = $node['host'];
+                $host = $node['api_server'];
                 $find = false;
                 foreach ($this->engines as $engine) {
                     if ($engine->host == $host) {
@@ -117,7 +117,7 @@ class Connector
             foreach ($this->engines as $key => $engine) {
                 $find = false;
                 foreach ($this->nodes->items() as $node) {
-                    if ($engine->host == $node['host']) {
+                    if ($engine->host == $node['api_server']) {
                         $find = true;
                         break;
                     }
