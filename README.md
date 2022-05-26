@@ -38,7 +38,7 @@ $onConnect = function (\Connmix\AsyncNodeInterface $node) {
 $onMessage = function (\Connmix\AsyncNodeInterface $node) {
     $message = $node->message();
     switch ($message->type()) {
-        case "consume":
+        case "event":
             $clientID = $message->clientID();
             $data = $message->data();
             // 回复消息
@@ -81,7 +81,7 @@ end
 $onMessage = function (\Connmix\AsyncNodeInterface $node) {
     $message = $node->message();
     switch ($message->type()) {
-        case "consume":
+        case "event":
             $clientID = $message->clientID();
             $data = $message->data();
             $op = $data['frame']['data']['op'] ?? '';
@@ -105,7 +105,7 @@ $onMessage = function (\Connmix\AsyncNodeInterface $node) {
 $onMessage = function (\Connmix\AsyncNodeInterface $node) {
     $message = $node->message();
     switch ($message->type()) {
-        case "consume":
+        case "event":
             $clientID = $message->clientID();
             $node->subscribe($clientID, "user_10001");
             break;
@@ -123,7 +123,7 @@ $onMessage = function (\Connmix\AsyncNodeInterface $node) {
 $onMessage = function (\Connmix\AsyncNodeInterface $node) {
     $message = $node->message();
     switch ($message->type()) {
-        case "consume":
+        case "event":
             $node->meshPublish("user_10001", '{"broadcast":"ok"}');
             break;
     }
@@ -133,8 +133,7 @@ $onMessage = function (\Connmix\AsyncNodeInterface $node) {
 - 主动推送 (同步模式)
 
 ```php
-$node = $client->random();
-$message = $node->meshPublish("user_10001", '{"broadcast":"ok"}');
+$message = $client->node()->meshPublish("user_10001", '{"broadcast":"ok"}');
 ```
 
 ## 发送到客户端
@@ -147,7 +146,7 @@ $message = $node->meshPublish("user_10001", '{"broadcast":"ok"}');
 $onMessage = function (\Connmix\AsyncNodeInterface $node) {
     $message = $node->message();
     switch ($message->type()) {
-        case "consume":
+        case "event":
             $clientID = $message->clientID();
             $node->meshSend($clientID, '{"result":"ok"}');
             break;
@@ -158,8 +157,7 @@ $onMessage = function (\Connmix\AsyncNodeInterface $node) {
 - 主动发送 (同步模式)
 
 ```php
-$node = $client->random();
-$message = $node->meshSend($clientID, '{"result":"ok"}');
+$message = $client->node()->meshSend($clientID, '{"result":"ok"}');
 ```
 
 ## License
