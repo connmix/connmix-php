@@ -34,9 +34,9 @@ class Client
     protected $onError;
 
     /**
-     * @var Nodes
+     * @var NodeSynchronizer
      */
-    protected $nodes;
+    protected $nodeSynchronizer;
 
     /**
      * @var SyncNodeManager
@@ -78,9 +78,9 @@ class Client
      */
     public function run(): void
     {
-        $this->nodes = new Nodes($this->host, $this->timeout);
-        $this->nodes->startSync();
-        $this->connector = new Connector($this->nodes, $this->timeout);
+        $this->nodeSynchronizer = new NodeSynchronizer($this->host, $this->timeout);
+        $this->nodeSynchronizer->startSync();
+        $this->connector = new Connector($this->nodeSynchronizer, $this->timeout);
         $this->connector->then($this->onConnect, $this->onMessage, $this->onError);
     }
 
@@ -99,9 +99,9 @@ class Client
      */
     public function node(?string $id): SyncNodeInterface
     {
-        if (!isset($this->nodes)) {
-            $this->nodes = new Nodes($this->host, $this->timeout);
-            $this->nodes->startSync();
+        if (!isset($this->nodeSynchronizer)) {
+            $this->nodeSynchronizer = new NodeSynchronizer($this->host, $this->timeout);
+            $this->nodeSynchronizer->startSync();
         }
 
         $manager = $this->syncNodeManager;
@@ -109,8 +109,8 @@ class Client
             return $manager->get($id);
         }
 
-        $nodes = $this->nodes->items();
-        $version = $this->nodes->version();
+        $nodes = $this->nodeSynchronizer->items();
+        $version = $this->nodeSynchronizer->version();
         if (is_null($id)) {
 
             $randNode = $nodes[array_rand($nodes)];
@@ -162,7 +162,7 @@ class Client
     {
         $this->connector and $this->connector->close();
 
-        $this->nodes and $this->nodes->close();
+        $this->nodeSynchronizer and $this->nodeSynchronizer->close();
 
         $loop = \React\EventLoop\Loop::get();
         $loop->stop();

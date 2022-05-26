@@ -8,9 +8,9 @@ class Connector
 {
 
     /**
-     * @var Nodes
+     * @var NodeSynchronizer
      */
-    protected $nodes;
+    protected $nodeSynchronizer;
 
     /**
      * @var float
@@ -44,13 +44,13 @@ class Connector
     protected $syncInterval = 60;
 
     /**
-     * @param Nodes $nodes
+     * @param NodeSynchronizer $nodes
      * @param float $timeout
      * @throws \Exception
      */
-    public function __construct(Nodes $nodes, float $timeout)
+    public function __construct(NodeSynchronizer $nodes, float $timeout)
     {
-        $this->nodes = $nodes;
+        $this->nodeSynchronizer = $nodes;
         $this->timeout = $timeout;
         \React\EventLoop\Loop::addTimer($this->syncInterval, $this->syncFunc());
     }
@@ -68,7 +68,7 @@ class Connector
         $this->onMessage = $onMessage;
         $this->onError = $onError;
 
-        foreach ($this->nodes->items() as $node) {
+        foreach ($this->nodeSynchronizer->items() as $node) {
             $this->addEngine($node['api_server']);
         }
     }
@@ -80,7 +80,7 @@ class Connector
      */
     protected function addEngine(string $host)
     {
-        switch ($this->nodes->version()) {
+        switch ($this->nodeSynchronizer->version()) {
             case 'v1':
                 $engine = new EngineV1($this->onConnect, $this->onMessage, $this->onError, $host, $this->timeout);
                 $engine->run();
@@ -99,7 +99,7 @@ class Connector
     {
         return function () {
             // 增加
-            foreach ($this->nodes->items() as $node) {
+            foreach ($this->nodeSynchronizer->items() as $node) {
                 $host = $node['api_server'];
                 $find = false;
                 foreach ($this->engines as $engine) {
@@ -116,7 +116,7 @@ class Connector
             // 减少
             foreach ($this->engines as $key => $engine) {
                 $find = false;
-                foreach ($this->nodes->items() as $node) {
+                foreach ($this->nodeSynchronizer->items() as $node) {
                     if ($engine->host == $node['api_server']) {
                         $find = true;
                         break;

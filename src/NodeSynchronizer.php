@@ -5,7 +5,7 @@ namespace Connmix;
 use Psr\Http\Message\ResponseInterface;
 use React\EventLoop\TimerInterface;
 
-class Nodes
+class NodeSynchronizer
 {
 
     /**
