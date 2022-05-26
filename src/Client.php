@@ -3,7 +3,6 @@
 namespace Connmix;
 
 use Connmix\V1\Message;
-use Connmix\V1\SyncNode;
 use Connmix\V1\SyncNode as NodeV1;
 
 class Client
@@ -40,9 +39,9 @@ class Client
     protected $nodes;
 
     /**
-     * @var SyncNode[]
+     * @var SyncNodeManager
      */
-    protected $cache = [];
+    protected $syncNodeManager = [];
 
     /**
      * @var Connector
@@ -104,28 +103,30 @@ class Client
             $this->nodes->startSync();
         }
 
-        $cache = &$this->cache;
-        if (isset($cache[$id])) {
-            return $cache[$id];
+        $manager = $this->syncNodeManager;
+        if (!is_null($id) && $manager->has($id)) {
+            return $manager->get($id);
         }
 
         $nodes = $this->nodes->items();
         $version = $this->nodes->version();
         if (is_null($id)) {
+
             $randNode = $nodes[array_rand($nodes)];
             $randNodeId = $randNode['id'];
-            if (isset($cache[$randNodeId])) {
-                return $cache[$randNodeId];
+            if ($manager->has($randNodeId)) {
+                return $manager->get($randNodeId);
             }
-            $newNode = $this->newNode($randNode['api_server'], $version);
-            $cache[$randNodeId] = $newNode;
+
+            $newNode = $this->newNode($randNode['api_server'], $version, $randNodeId, $manager);
+            $manager->set($newNode, $randNodeId);
             return $newNode;
         }
 
         foreach ($nodes as $node) {
             if ($node['id'] == $id) {
-                $newNode = $this->newNode($node['api_server'], $version);
-                $cache[$id] = $newNode;
+                $newNode = $this->newNode($node['api_server'], $version, $id, $manager);
+                $manager->set($newNode, $id);
                 return $newNode;
             }
         }
@@ -137,15 +138,17 @@ class Client
     /**
      * @param string $host
      * @param string $version
+     * @param string $id
+     * @param SyncNodeManager $manager
      * @return SyncNodeInterface
      * @throws \Exception
      */
-    protected function newNode(string $host, string $version): SyncNodeInterface
+    protected function newNode(string $host, string $version, string $id, SyncNodeManager $manager): SyncNodeInterface
     {
         switch ($version) {
             case 'v1':
                 $url = sprintf("ws://%s/ws/v1", $host);
-                return new NodeV1($url);
+                return new NodeV1($url, $manager);
             default:
                 throw new \Exception('Invalid API version');
         }

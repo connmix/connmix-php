@@ -5,6 +5,7 @@ namespace Connmix\V1;
 use Connmix\AutoIncrement;
 use Connmix\MessageInterface;
 use Connmix\SyncNodeInterface;
+use Connmix\SyncNodeManager;
 
 class SyncNode implements SyncNodeInterface
 {
@@ -15,16 +16,30 @@ class SyncNode implements SyncNodeInterface
     protected $client;
 
     /**
+     * @var string
+     */
+    protected $id;
+
+    /**
+     * @var SyncNodeManager
+     */
+    protected $manager;
+
+    /**
      * @var Encoder
      */
     protected $encoder;
 
     /**
      * @param string $url
+     * @param string $id
+     * @param SyncNodeManager $manager
      */
-    public function __construct(string $url)
+    public function __construct(string $url, string $id, SyncNodeManager $manager)
     {
         $this->client = new \WebSocket\Client($url);
+        $this->id = $id;
+        $this->manager = $manager;
         $this->encoder = new Encoder();
     }
 
@@ -91,12 +106,17 @@ class SyncNode implements SyncNodeInterface
      */
     public function send(string $method, array $params = []): MessageInterface
     {
-        $message = $this->encoder->encode([
-            'm' => $method,
-            'p' => $params,
-            'i' => AutoIncrement::id(),
-        ]);
-        $this->client->send($message);
+        try {
+            $message = $this->encoder->encode([
+                'm' => $method,
+                'p' => $params,
+                'i' => AutoIncrement::id(),
+            ]);
+            $this->client->send($message);
+        } catch (\Throwable $ex) {
+            $this->manager->delete($this->id);
+            throw $ex;
+        }
         return new Message($this->client->receive());
     }
 
