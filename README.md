@@ -33,7 +33,7 @@ $client = \Connmix\ClientBuilder::create()
     ->build();
 $onConnect = function (\Connmix\AsyncNodeInterface $node) {
     // 消费内存队列
-    $node->consume('foo');
+    $node->pop('foo');
 };
 $onMessage = function (\Connmix\AsyncNodeInterface $node) {
     $message = $node->message();
