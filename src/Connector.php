@@ -2,7 +2,7 @@
 
 namespace Connmix;
 
-use Connmix\V1\Engine as EngineV1;
+use Connmix\V1\AsyncNodeEngine as EngineV1;
 
 class Connector
 {

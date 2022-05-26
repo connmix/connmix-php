@@ -41,7 +41,7 @@ class Client
     /**
      * @var SyncNodeManager
      */
-    protected $syncNodeManager = [];
+    protected $syncNodeManager;
 
     /**
      * @var Connector
@@ -56,6 +56,7 @@ class Client
         foreach ($config as $key => $value) {
             $this->$key = $value;
         }
+        $this->syncNodeManager = new SyncNodeManager();
     }
 
     /**
@@ -148,7 +149,7 @@ class Client
         switch ($version) {
             case 'v1':
                 $url = sprintf("ws://%s/ws/v1", $host);
-                return new NodeV1($url, $manager);
+                return new NodeV1($url, $id, $manager);
             default:
                 throw new \Exception('Invalid API version');
         }

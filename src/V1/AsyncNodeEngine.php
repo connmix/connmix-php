@@ -2,7 +2,7 @@
 
 namespace Connmix\V1;
 
-class Engine
+class AsyncNodeEngine
 {
 
     /**
