@@ -65,9 +65,9 @@ class AsyncNode implements AsyncNodeInterface
      * @param string ...$topics
      * @return int
      */
-    public function consume(string ...$topics): int
+    public function pop(string ...$topics): int
     {
-        return $this->send('queue.consume', $topics);
+        return $this->send('queue.pop', $topics);
     }
 
     /**

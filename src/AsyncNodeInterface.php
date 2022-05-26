@@ -7,7 +7,7 @@ interface AsyncNodeInterface
 
     public function message(): MessageInterface;
 
-    public function consume(string ...$topics): int;
+    public function pop(string ...$topics): int;
 
     public function setContextValue(int $clientId, string $key, $value): int;
 
