@@ -42,7 +42,7 @@ class Client
     /**
      * @var SyncNode[]
      */
-    protected $cache;
+    protected $cache = [];
 
     /**
      * @var Connector
@@ -112,9 +112,13 @@ class Client
         $nodes = $this->nodes->items();
         $version = $this->nodes->version();
         if (is_null($id)) {
-            $node = $nodes[array_rand($nodes)];
-            $newNode = $this->newNode($node['api_server'], $version);
-            $cache[$node['id']] = $newNode;
+            $randNode = $nodes[array_rand($nodes)];
+            $randNodeId = $randNode['id'];
+            if (isset($cache[$randNodeId])) {
+                return $cache[$randNodeId];
+            }
+            $newNode = $this->newNode($randNode['api_server'], $version);
+            $cache[$randNodeId] = $newNode;
             return $newNode;
         }
 
